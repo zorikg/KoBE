@@ -1,2 +1,2 @@
 # KoBE
-Data and code for Multilingual Knowledge Based Machine Translation Evaluation
+Data and code for Knowledge Based Machine Translation Evaluation Paper.
