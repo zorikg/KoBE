@@ -70,7 +70,7 @@ def get_correllations(full_df, lang_pairs_strings):
 
 def genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, lang_pairs_strings):
     df = submitted_qe_and_bleu_and_us_df_correl_df_raw[lang_pairs_strings].drop(['entity_recall_metric']).rename(
-        index={'entity_recall_qe': 'MKBE'}).dropna(how='all')
+        index={'entity_recall_qe': 'KoBE'}).dropna(how='all')
     df.fillna(value='--', inplace=True)
     return df
 
@@ -128,7 +128,7 @@ def main(base_path):
     print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
     print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['en-cs', 'en-de', 'en-fi', 'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh']).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
     print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['de-cs', 'de-fr', 'fr-de'])}")
-    print(f"\n{submitted_qe_and_bleu_and_us_df_correl_df_raw.loc[['BLEU', 'entity_recall_metric']][['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']].rename(index={'entity_recall_metric': 'MKBE reference based'})}")
+    print(f"\n{submitted_qe_and_bleu_and_us_df_correl_df_raw.loc[['BLEU', 'entity_recall_metric']][['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']].rename(index={'entity_recall_metric': 'KoBE reference based'})}")
 
 
 if __name__ == '__main__':
