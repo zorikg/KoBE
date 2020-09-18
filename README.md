@@ -13,3 +13,5 @@ Clone the directory and then run "reproduce_paper_results" script.
 ```python
 bash <path to cloned directory root>/KoBE/reproduce_paper_results.sh
 ```
+
+**This is not an officially supported Google product.**
