@@ -22,9 +22,9 @@ def calc_percentage(total, matched):
     return round(float(matched * 100) / total, 2)
 
 
-def read_all_annotations(annotations_dir_path, lang_pairs_strings):
+def read_all_annotations(annotations_dir_path, all_lps):
     result = defaultdict()
-    for lang_pair_str in lang_pairs_strings:
+    for lang_pair_str in all_lps:
         print("\n" + lang_pair_str + " read annotations")
         lang_pair_suffix = "." + lang_pair_str
         result[lang_pair_str] = defaultdict()
@@ -66,32 +66,35 @@ def get_correl(full_df, metric_mame, lp):
     return round(lp_df['DA'].corr(lp_df[metric_mame]), 3)
 
 
-def get_correllations(full_df, lang_pairs_strings):
-    d = {lp: [] for lp in lang_pairs_strings}
+def get_correllations(full_df, lps):
+    d = {lp: [] for lp in lps}
     d['metric'] = []
     for metric in full_df.columns:
         if metric not in {'lp', 'DA', 'system'}:
             d['metric'].append(metric)
-            for lang_pair_str in lang_pairs_strings:
+            for lang_pair_str in lps:
                 d[lang_pair_str].append(get_correl(full_df, metric, lang_pair_str))
-    correl_df = pd.DataFrame(d, columns=['metric'] + lang_pairs_strings).set_index('metric')
+    correl_df = pd.DataFrame(d, columns=['metric'] + lps).set_index('metric')
     correl_df.index.name = None
     return correl_df
 
 
-def genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, lang_pairs_strings):
-    df = submitted_qe_and_bleu_and_us_df_correl_df_raw[lang_pairs_strings].drop(['entity_recall_metric']).rename(
+def generate_results_table(submitted_qe_and_bleu_and_us_correl_df, lps):
+    df = submitted_qe_and_bleu_and_us_correl_df[lps].drop(['entity_recall_metric']).rename(
         index={'entity_recall_qe': 'KoBE'}).dropna(how='all')
     df.fillna(value='--', inplace=True)
     return df
 
 
 def main(base_path):
-    lang_pairs_strings = ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en', 'en-cs', 'en-de', 'en-fi',
-                          'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh', 'de-cs', 'de-fr', 'fr-de']
+    print(f"\nreading annotated data from - {base_path}\n")
+    to_en_lps = ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']
+    no_en_lps = ['de-cs', 'de-fr', 'fr-de']
+    from_en_lps = ['en-cs', 'en-de', 'en-fi', 'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh']
+    all_lps = to_en_lps + no_en_lps + from_en_lps
 
     all_annotations = read_all_annotations(os.path.join(base_path, 'annotations/wmt19-submitted-data/newstest2019'),
-                                           lang_pairs_strings)
+                                           all_lps)
 
     scores = {'entity_recall_qe': defaultdict(dict), 'entity_recall_metric': defaultdict(dict)}
     for lang_pair in all_annotations.keys():
@@ -116,7 +119,7 @@ def main(base_path):
     del all_results_df['Unnamed: 0']
     submitted_qe_and_bleu_df = all_results_df[
         ['lp', 'DA', 'system', 'BLEU', 'ibm1-morpheme', 'ibm1-pos4gram', 'LASIM', 'LP', 'UNI', 'UNI+', 'USFD',
-         'USFD-TL', 'YiSi-2', 'YiSi-2_srl']].loc[all_results_df['lp'].isin(set(lang_pairs_strings))]
+         'USFD-TL', 'YiSi-2', 'YiSi-2_srl']].loc[all_results_df['lp'].isin(set(all_lps))]
 
     all_score_names = ['entity_recall_qe', 'entity_recall_metric']
     d = {'lp': [], 'system': [], 'entity_recall_qe': [], 'entity_recall_metric': []}
@@ -132,14 +135,18 @@ def main(base_path):
                                                left_on=['lp', 'system'], right_on=['lp', 'system'])
     submitted_qe_and_bleu_and_us_df = submitted_qe_and_bleu_and_us_df[
         (submitted_qe_and_bleu_and_us_df['system'] != 'online-B.0') | (
-                    submitted_qe_and_bleu_and_us_df['lp'] != 'gu-en')]  # Scores for 'online-B.0' in 'gu-en' are missing
-    submitted_qe_and_bleu_and_us_df_correl_df_raw = get_correllations(submitted_qe_and_bleu_and_us_df,
-                                                                      lang_pairs_strings)
+                submitted_qe_and_bleu_and_us_df['lp'] != 'gu-en')]  # Scores for 'online-B.0' in 'gu-en' are missing
+    submitted_qe_and_bleu_and_us_correl_df = get_correllations(submitted_qe_and_bleu_and_us_df,
+                                                                      all_lps)
 
-    print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
-    print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['en-cs', 'en-de', 'en-fi', 'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh']).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
-    print(f"\n{genarate_results_table_for_paper(submitted_qe_and_bleu_and_us_df_correl_df_raw, ['de-cs', 'de-fr', 'fr-de'])}")
-    print(f"\n{submitted_qe_and_bleu_and_us_df_correl_df_raw.loc[['BLEU', 'entity_recall_metric']][['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']].rename(index={'entity_recall_metric': 'KoBE reference based'})}")
+    print(
+        f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, to_en_lps).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
+    print(
+        f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, from_en_lps).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
+    print(f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, no_en_lps)}")
+
+    print(
+        f"\n\n{submitted_qe_and_bleu_and_us_correl_df.loc[['BLEU', 'entity_recall_metric']][to_en_lps].rename(index={'entity_recall_metric': 'KoBE reference based'})}")
 
 
 if __name__ == '__main__':
