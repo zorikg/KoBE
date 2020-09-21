@@ -18,25 +18,24 @@ import json, math, os, sys
 from pathlib import Path
 
 
-def calc_percentage(total, matched):
-    return round(float(matched * 100) / total, 2)
-
-
 def read_all_annotations(annotations_dir_path, all_lps):
-    result = defaultdict()
+    result = defaultdict(defaultdict)
     for lang_pair_str in all_lps:
-        print("\n" + lang_pair_str + " read annotations")
-        lang_pair_suffix = "." + lang_pair_str
-        result[lang_pair_str] = defaultdict()
+        print(f"{lang_pair_str} read annotations\n")
         for annotations_filename in os.listdir(os.path.join(annotations_dir_path, lang_pair_str)):
             with open(os.path.join(annotations_dir_path, lang_pair_str, annotations_filename)) as reader:
                 annotations = json.load(reader)
             if "-ref." not in annotations_filename and "-src." not in annotations_filename:
+                lang_pair_suffix = f".{lang_pair_str}"
                 system_name = annotations_filename[len("newstest2019."):-len(lang_pair_suffix)]
             else:
                 system_name = 'ref' if "-ref." in annotations_filename else 'src'
             result[lang_pair_str][system_name] = annotations
     return result
+
+
+def calc_percentage(total, matched):
+    return round(float(matched * 100) / total, 2)
 
 
 def entity_count_penalty(src_count, cnd_count):
@@ -61,22 +60,22 @@ def match_ids(src_annotations, cnd_annotations):
     return counters
 
 
-def get_correl(full_df, metric_mame, lp):
+def get_correlation(full_df, metric_mame, lp):
     lp_df = full_df.loc[full_df['lp'] == lp]
     return round(lp_df['DA'].corr(lp_df[metric_mame]), 3)
 
 
-def get_correllations(full_df, lps):
+def get_correlations(full_df, lps):
     d = {lp: [] for lp in lps}
     d['metric'] = []
     for metric in full_df.columns:
         if metric not in {'lp', 'DA', 'system'}:
             d['metric'].append(metric)
             for lang_pair_str in lps:
-                d[lang_pair_str].append(get_correl(full_df, metric, lang_pair_str))
-    correl_df = pd.DataFrame(d, columns=['metric'] + lps).set_index('metric')
-    correl_df.index.name = None
-    return correl_df
+                d[lang_pair_str].append(get_correlation(full_df, metric, lang_pair_str))
+    df = pd.DataFrame(d, columns=['metric'] + lps).set_index('metric')
+    df.index.name = None
+    return df
 
 
 def generate_results_table(submitted_qe_and_bleu_and_us_correl_df, lps):
@@ -85,6 +84,24 @@ def generate_results_table(submitted_qe_and_bleu_and_us_correl_df, lps):
     df.fillna(value='--', inplace=True)
     return df
 
+
+def calc_scores(all_annotations):
+    scores = {'entity_recall_qe': defaultdict(defaultdict), 'entity_recall_metric': defaultdict(defaultdict)}
+    for lang_pair, annotations in all_annotations.items():
+        print(f"{lang_pair} calc scores\n")
+        all_system_names = [key for key in annotations if key not in {'src', 'ref'}]
+        for sys_name in all_system_names:
+            qe_counters = match_ids(annotations['src']['annotated_sentence'],
+                                    annotations[sys_name]['annotated_sentence'])
+            metric_counters = match_ids(annotations['ref']['annotated_sentence'],
+                                        annotations[sys_name]['annotated_sentence'])
+            scores['entity_recall_qe'][lang_pair][sys_name] = calc_percentage(qe_counters['src_count'], qe_counters[
+                'match_count']) * entity_count_penalty(qe_counters['src_count'], qe_counters['cnd_count'])
+            scores['entity_recall_metric'][lang_pair][sys_name] = calc_percentage(metric_counters['src_count'],
+                                                                                  metric_counters[
+                                                                                      'match_count']) * entity_count_penalty(
+                metric_counters['src_count'], metric_counters['cnd_count'])
+    return scores
 
 def main(base_path):
     print(f"\nreading annotated data from - {base_path}\n")
@@ -96,23 +113,7 @@ def main(base_path):
     all_annotations = read_all_annotations(os.path.join(base_path, 'annotations/wmt19-submitted-data/newstest2019'),
                                            all_lps)
 
-    scores = {'entity_recall_qe': defaultdict(dict), 'entity_recall_metric': defaultdict(dict)}
-    for lang_pair in all_annotations.keys():
-        scores['entity_recall_qe'][lang_pair], scores['entity_recall_metric'][lang_pair] = defaultdict(
-            dict), defaultdict(dict)
-        print("\n" + str(lang_pair) + " calc scores")
-        all_system_names = [key for key in all_annotations[lang_pair] if key not in {'src', 'ref'}]
-        for sys_name in all_system_names:
-            qe_counters = match_ids(all_annotations[lang_pair]['src']['annotated_sentence'],
-                                    all_annotations[lang_pair][sys_name]['annotated_sentence'])
-            metric_counters = match_ids(all_annotations[lang_pair]['ref']['annotated_sentence'],
-                                        all_annotations[lang_pair][sys_name]['annotated_sentence'])
-            scores['entity_recall_qe'][lang_pair][sys_name] = calc_percentage(qe_counters['src_count'], qe_counters[
-                'match_count']) * entity_count_penalty(qe_counters['src_count'], qe_counters['cnd_count'])
-            scores['entity_recall_metric'][lang_pair][sys_name] = calc_percentage(metric_counters['src_count'],
-                                                                                  metric_counters[
-                                                                                      'match_count']) * entity_count_penalty(
-                metric_counters['src_count'], metric_counters['cnd_count'])
+    scores = calc_scores(all_annotations)
 
     all_results_df = pd.read_csv(
         open(os.path.join(base_path, 'wmt19_metric_task_results/sys-level_scores_metrics.csv')), sep=',')
@@ -136,17 +137,19 @@ def main(base_path):
     submitted_qe_and_bleu_and_us_df = submitted_qe_and_bleu_and_us_df[
         (submitted_qe_and_bleu_and_us_df['system'] != 'online-B.0') | (
                 submitted_qe_and_bleu_and_us_df['lp'] != 'gu-en')]  # Scores for 'online-B.0' in 'gu-en' are missing
-    submitted_qe_and_bleu_and_us_correl_df = get_correllations(submitted_qe_and_bleu_and_us_df,
-                                                                      all_lps)
+    submitted_qe_and_bleu_and_us_correl_df = get_correlations(submitted_qe_and_bleu_and_us_df, all_lps)
 
-    print(
-        f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, to_en_lps).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
-    print(
-        f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, from_en_lps).drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")
-    print(f"\n{generate_results_table(submitted_qe_and_bleu_and_us_correl_df, no_en_lps)}")
+    to_en_results_table = generate_results_table(submitted_qe_and_bleu_and_us_correl_df, to_en_lps)
+    print(f"\n{to_en_results_table.drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")  # No reported ibm1 results in WMT19.
 
-    print(
-        f"\n\n{submitted_qe_and_bleu_and_us_correl_df.loc[['BLEU', 'entity_recall_metric']][to_en_lps].rename(index={'entity_recall_metric': 'KoBE reference based'})}")
+    from_en_results_table = generate_results_table(submitted_qe_and_bleu_and_us_correl_df, from_en_lps)
+    print(f"\n{from_en_results_table.drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")  # No reported ibm1 results in WMT19.
+
+    no_en_results_table = generate_results_table(submitted_qe_and_bleu_and_us_correl_df, no_en_lps)
+    print(f"\n{no_en_results_table}")
+
+    to_en_metric_results_table = submitted_qe_and_bleu_and_us_correl_df.loc[['BLEU', 'entity_recall_metric']][to_en_lps]
+    print(f"\n\n{to_en_metric_results_table.rename(index={'entity_recall_metric': 'KoBE reference based'})}")
 
 
 if __name__ == '__main__':
