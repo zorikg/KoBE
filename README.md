@@ -43,6 +43,8 @@ in each sentence. Each entity has an id, start and end positions in the sentence
 }
 ```
 
+Additional details and data description can be found in the paper under supplementary material.
+
 TODO: Add entity mentions.
 
 ## Scripts to reproduce papers results
