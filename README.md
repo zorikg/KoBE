@@ -59,7 +59,7 @@ Clone the directory and then run "reproduce_paper_results" script.
 bash <path to cloned directory root>/KoBE/reproduce_paper_results.sh
 ```
 
-##bibtex
+## bibtex
 
 If you find this useful for your work, please use the following citation:
 
