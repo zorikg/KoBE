@@ -27,25 +27,37 @@ text and reference translations. Our annotations are in json format and contain 
 in each sentence. Each entity has an id, start and end positions in the sentence. For example:
 ```json
 {
-    "sentence": "Beautiful Munich 2018: Beautiful Munich 2018 in Hvar: Nine Dates",
-    "entities": [
-        {
-            "begin": 33, 
-            "end": 39, 
-            "id": "/m/02h6_6p"
-        }, 
-        {
-            "begin": 54, 
-            "end": 58, 
-            "id": "/m/017vb_"
-        }
-    ]
+  "sentence": "In the aftermath of the Lombok earthquake, for instance, foreign nongovernmental organizations were told they were not needed.",
+  "entities": [
+    {
+      "begin": 65,
+      "end": 94,
+      "id": "/m/0ckys",
+      "text": "nongovernmental organizations"
+    },
+    {
+      "begin": 31,
+      "end": 41,
+      "id": "/m/02r97",
+      "text": "earthquake"
+    },
+    {
+      "begin": 24,
+      "end": 30,
+      "id": "/m/04nd9",
+      "text": "Lombok"
+    },
+    {
+      "begin": 81,
+      "end": 94,
+      "id": "/m/0qb7t",
+      "text": "organizations"
+    }
+  ]
 }
 ```
 
 Additional details and data description can be found in the paper under supplementary material.
-
-TODO: Add entity mentions.
 
 ## Scripts to reproduce papers results
 We also publish the code that calculates KoBE on the annotated dataset reproduces the results from the paper.
