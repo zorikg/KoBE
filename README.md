@@ -1,7 +1,7 @@
 # KoBE
 Data and code for Knowledge Based Machine Translation Evaluation paper.
 
-KoBE is a reference-less Machine Translation evaluation metric. 
+KoBE is a reference-less machine translation evaluation metric. 
 Our approach is based on using entity linking pipelines to ground the entity mentions found in each source sentence 
 and candidate translation against a large-scale multilingual knowledge base (Google Knowledge Graph). 
 KoBE is then using the matched entities counts as a translation quality signal.
