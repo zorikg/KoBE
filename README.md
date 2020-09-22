@@ -41,8 +41,9 @@ in each sentence. Each entity has an id, start and end positions in the sentence
         }
     ]
 }
-
 ```
+
+TODO: Add entity mentions.
 
 ## Scripts to reproduce papers results
 We also publish the code that calculates KoBE on the annotated dataset reproduces the results from the paper.
