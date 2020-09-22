@@ -1,6 +1,8 @@
 # KoBE
 Data and code for Knowledge Based Machine Translation Evaluation paper.
 
+TODO: Add link to paper.
+
 KoBE is a reference-less machine translation evaluation metric. 
 Our approach is based on using entity linking pipelines to ground the entity mentions found in each source sentence 
 and candidate translation against a large-scale multilingual knowledge base (Google Knowledge Graph). 
@@ -56,5 +58,11 @@ Clone the directory and then run "reproduce_paper_results" script.
 ```python
 bash <path to cloned directory root>/KoBE/reproduce_paper_results.sh
 ```
+
+##bibtex
+If you find this useful for your work, please use the following citation:
+
+TODO: Add citation.
+
 
 
