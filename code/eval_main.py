@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import math
+import os
 from collections import defaultdict, Counter
-import pandas as pd
-import json, math, os, sys
 from pathlib import Path
+import pandas as pd
 
 
 def read_all_annotations(annotations_dir_path, all_lps):
@@ -103,25 +105,19 @@ def calc_scores(all_annotations):
                 metric_counters['src_count'], metric_counters['cnd_count'])
     return scores
 
-def main(base_path):
-    print(f"\nreading annotated data from - {base_path}\n")
-    to_en_lps = ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']
-    no_en_lps = ['de-cs', 'de-fr', 'fr-de']
-    from_en_lps = ['en-cs', 'en-de', 'en-fi', 'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh']
-    all_lps = to_en_lps + no_en_lps + from_en_lps
 
-    all_annotations = read_all_annotations(os.path.join(base_path, 'annotations/wmt19-submitted-data/newstest2019'),
-                                           all_lps)
-
-    scores = calc_scores(all_annotations)
-
+def get_wmt19_results(base_path, all_lps):
     all_results_df = pd.read_csv(
         open(os.path.join(base_path, 'wmt19_metric_task_results/sys-level_scores_metrics.csv')), sep=',')
     del all_results_df['Unnamed: 0']
     submitted_qe_and_bleu_df = all_results_df[
         ['lp', 'DA', 'system', 'BLEU', 'ibm1-morpheme', 'ibm1-pos4gram', 'LASIM', 'LP', 'UNI', 'UNI+', 'USFD',
          'USFD-TL', 'YiSi-2', 'YiSi-2_srl']].loc[all_results_df['lp'].isin(set(all_lps))]
+    return submitted_qe_and_bleu_df
 
+
+def calc_scores_df(all_annotations):
+    scores = calc_scores(all_annotations)
     all_score_names = ['entity_recall_qe', 'entity_recall_metric']
     d = {'lp': [], 'system': [], 'entity_recall_qe': [], 'entity_recall_metric': []}
     for lang_pair in scores[all_score_names[0]].keys():
@@ -131,14 +127,19 @@ def main(base_path):
             d['entity_recall_qe'].append(scores['entity_recall_qe'][lang_pair][system])
             d['entity_recall_metric'].append(scores['entity_recall_metric'][lang_pair][system])
     scores_df = pd.DataFrame(d, columns=['lp', 'system', 'entity_recall_qe', 'entity_recall_metric'])
+    return scores_df
 
+
+def merge_scores_with_wmt_scores(scores_df, submitted_qe_and_bleu_df):
     submitted_qe_and_bleu_and_us_df = pd.merge(submitted_qe_and_bleu_df, scores_df, how='outer',
                                                left_on=['lp', 'system'], right_on=['lp', 'system'])
     submitted_qe_and_bleu_and_us_df = submitted_qe_and_bleu_and_us_df[
         (submitted_qe_and_bleu_and_us_df['system'] != 'online-B.0') | (
                 submitted_qe_and_bleu_and_us_df['lp'] != 'gu-en')]  # Scores for 'online-B.0' in 'gu-en' are missing
-    submitted_qe_and_bleu_and_us_correl_df = get_correlations(submitted_qe_and_bleu_and_us_df, all_lps)
+    return submitted_qe_and_bleu_and_us_df
 
+
+def print_results(submitted_qe_and_bleu_and_us_correl_df, to_en_lps, from_en_lps, no_en_lps):
     to_en_results_table = generate_results_table(submitted_qe_and_bleu_and_us_correl_df, to_en_lps)
     print(f"\n{to_en_results_table.drop(['ibm1-morpheme', 'ibm1-pos4gram'])}")  # No reported ibm1 results in WMT19.
 
@@ -150,6 +151,33 @@ def main(base_path):
 
     to_en_metric_results_table = submitted_qe_and_bleu_and_us_correl_df.loc[['BLEU', 'entity_recall_metric']][to_en_lps]
     print(f"\n\n{to_en_metric_results_table.rename(index={'entity_recall_metric': 'KoBE reference based'})}")
+
+
+def main(base_path):
+    print(f"\nreading annotated data from - {base_path}\n")
+    to_en_lps = ['de-en', 'fi-en', 'gu-en', 'kk-en', 'lt-en', 'ru-en', 'zh-en']
+    from_en_lps = ['en-cs', 'en-de', 'en-fi', 'en-gu', 'en-kk', 'en-lt', 'en-ru', 'en-zh']
+    no_en_lps = ['de-cs', 'de-fr', 'fr-de']
+    all_lps = to_en_lps + no_en_lps + from_en_lps
+
+    # Read all annotated WMT19 data.
+    annotated_data_path = os.path.join(base_path, 'annotations/wmt19-submitted-data/newstest2019')
+    all_annotations = read_all_annotations(annotated_data_path, all_lps)
+
+    # Calculate KoBE scores.
+    scores_df = calc_scores_df(all_annotations)
+
+    # Read other metrics results from WMT19.
+    submitted_qe_and_bleu_df = get_wmt19_results(base_path, all_lps)
+
+    # Merge KoBE results with other metrics results from WMT19 to single table.
+    submitted_qe_and_bleu_and_us_df = merge_scores_with_wmt_scores(scores_df, submitted_qe_and_bleu_df)
+
+    # Calculate all metrics correlations with human DA.
+    submitted_qe_and_bleu_and_us_correl_df = get_correlations(submitted_qe_and_bleu_and_us_df, all_lps)
+
+    # Print the results as presented in KoBE paper.
+    print_results(submitted_qe_and_bleu_and_us_correl_df, to_en_lps, from_en_lps, no_en_lps)
 
 
 if __name__ == '__main__':
