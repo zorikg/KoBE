@@ -10,7 +10,7 @@ the new location will be posted here.
 KoBE is a reference-less machine translation evaluation metric. 
 Our approach is based on using entity linking pipelines to ground the entity mentions found in each source sentence 
 and candidate translation against a large-scale multilingual knowledge base (Google Knowledge Graph). 
-KoBE is then using the matched entities counts as a translation quality signal.
+KoBE is then using the matched entity counts as a translation quality signal.
 
 Unfortunately, we are not aware of any open-source multilingual KB and entity linking systems.
 Therefore, to make sure our findings are fully reproducible and useful for future work, we release the annotations we
