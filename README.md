@@ -66,7 +66,7 @@ For example:
 Additional details and data description can be found in the paper under supplementary material.
 
 ## Scripts to reproduce papers results
-We also publish the code that calculates KoBE on the annotated dataset reproduces the results from the paper.
+We also publish the code that calculates KoBE on the annotated dataset to reproduce the results from the paper.
 ### Prerequisites
 * Make sure you have python 3.7.5 or above.
 * Make sure you have pandas installed:
