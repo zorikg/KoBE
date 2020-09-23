@@ -75,7 +75,7 @@ pip install pandas
 ```
 
 ### Usage
-Clone the directory and then run "reproduce_paper_results" script.
+Clone the directory and then run the "reproduce_paper_results" script.
 ```python
 bash <path to cloned directory root>/KoBE/reproduce_paper_results.sh
 ```
