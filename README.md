@@ -1,5 +1,6 @@
 # KoBE
 Data and code for "Knowledge Based Machine Translation Evaluation".
+
 TODO: Add link to paper (scheduled to be announced in archive at Thu, 24 Sep 2020 00:00:00 GMT).
 
 This is a temporal location. The code and data will be soon moved to 
