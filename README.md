@@ -1,7 +1,13 @@
 # KoBE
 Data and code for Knowledge Based Machine Translation Evaluation paper.
 
+This is a temporal location. The code and data will be soon moved to 
+[github.com/google-research/google-research](https://github.com/google-research/google-research) repository. A link to
+the new location will be posted here.
+
 TODO: Add link to paper.
+
+ 
 
 KoBE is a reference-less machine translation evaluation metric. 
 Our approach is based on using entity linking pipelines to ground the entity mentions found in each source sentence 
