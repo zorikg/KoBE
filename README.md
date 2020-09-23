@@ -3,7 +3,7 @@ Data and code for "Knowledge Based Machine Translation Evaluation".
 
 TODO: Add link to paper (scheduled to be announced in archive at Thu, 24 Sep 2020 00:00:00 GMT).
 
-This is a temporal location. The code and data will be soon moved to 
+This is a temporary location. The code and data will be soon moved to 
 [github.com/google-research/google-research](https://github.com/google-research/google-research) repository. A link to
 the new location will be posted here.
 
@@ -28,7 +28,9 @@ entities from [Google Knowledge Graph Search API](https://developers.google.com/
 
 The published data contains a file for each system in each language pair, as well as the annotations for the source 
 text and reference translations. Our annotations are in json format and contain all the entities that were detected 
-in each sentence. Each entity has an id, start and end positions in the sentence. For example:
+in each sentence. Each entity has an id (from the Knowledge Base), start and end positions in the sentence and the 
+text of the mention. 
+For example:
 ```json
 {
   "sentence": "In the aftermath of the Lombok earthquake, for instance, foreign nongovernmental organizations were told they were not needed.",
