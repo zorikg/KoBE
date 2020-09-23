@@ -78,7 +78,15 @@ bash <path to cloned directory root>/KoBE/reproduce_paper_results.sh
 
 If you find this useful for your work, please use the following citation:
 
-TODO: Add citation.
+```
+@inproceedings{gekhman2020kobe,
+  title={KoBE: Knowledge-Based Machine Translation Evaluation},
+  author={Gekhman, Zorik and Aharoni, Roee and Beryozkin, Genady and Freitag, Markus and Macherey, Wolfgang}
+  booktitle = "Findings of EMNLP",
+  year={2020},
+  url={https://arxiv.org/abs/2004.02105},
+}
+```
 
 
 
