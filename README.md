@@ -90,7 +90,7 @@ If you find this useful for your work, please use the following citation:
   author={Gekhman, Zorik and Aharoni, Roee and Beryozkin, Genady and Freitag, Markus and Macherey, Wolfgang}
   booktitle = "Findings of EMNLP",
   year={2020},
-  url={https://arxiv.org/abs/2004.02105},
+  url={TODO: add url},
 }
 ```
 
