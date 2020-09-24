@@ -1,5 +1,5 @@
 # KoBE
-Data and code for "Knowledge Based Machine Translation Evaluation".
+Data and code for [Knowledge Based Machine Translation Evaluation](https://arxiv.org/abs/2009.11027).
 
 TODO: Add link to paper (scheduled to be announced in archive at Thu, 24 Sep 2020 00:00:00 GMT).
 
@@ -90,7 +90,7 @@ If you find this useful for your work, please use the following citation:
   author={Gekhman, Zorik and Aharoni, Roee and Beryozkin, Genady and Freitag, Markus and Macherey, Wolfgang}
   booktitle = "Findings of EMNLP",
   year={2020},
-  url={TODO: add url},
+  url={https://arxiv.org/abs/2009.11027},
 }
 ```
 
