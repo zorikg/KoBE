@@ -1,8 +1,6 @@
 # KoBE
 Data and code for [Knowledge Based Machine Translation Evaluation](https://arxiv.org/abs/2009.11027).
 
-TODO: Add link to paper (scheduled to be announced in archive at Thu, 24 Sep 2020 00:00:00 GMT).
-
 This is a temporary location. The code and data will be soon moved to 
 [github.com/google-research/google-research](https://github.com/google-research/google-research) repository. A link to
 the new location will be posted here.
