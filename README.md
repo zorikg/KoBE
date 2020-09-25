@@ -63,6 +63,16 @@ For example:
 
 Additional details and data description can be found in the paper under supplementary material.
 
+The data is placed in a public Google Cloud Storage Bucket. 
+
+You can download the annotations using this 
+[link](http://storage.googleapis.com/gresearch/kobe/data/annotations.zip) but our shell script will do that for you.
+
+In addition, for convenience, we uploaded the original WMT19 system level scores to our bucket as well. 
+You can download them using this 
+[link](http://storage.googleapis.com/gresearch/kobe/data/wmt19_metric_task_results/sys-level_scores_metrics.csv) but 
+our shell script will do that for you.
+
 ## Scripts to reproduce papers results
 We also publish the code that calculates KoBE on the annotated dataset to reproduce the results from the paper.
 ### Prerequisites
