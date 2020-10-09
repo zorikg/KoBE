@@ -1,7 +1,7 @@
 # KoBE
 Data and code for [Knowledge Based Machine Translation Evaluation](https://arxiv.org/abs/2009.11027).
 
-This is a temporary location. The code and data will be soon moved to 
+This is a temporary location. The code will be soon refactored and moved to 
 [github.com/google-research/google-research](https://github.com/google-research/google-research) repository. A link to
 the new location will be posted here.
 
